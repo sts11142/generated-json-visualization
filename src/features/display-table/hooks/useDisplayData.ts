@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 
 type DisplayData = Array<{
@@ -21,28 +21,62 @@ type DisplayData = Array<{
   }>;
 }>;
 
+type Strategy =
+  | "[Question]"
+  | "[Restatement or Paraphrasing]"
+  | "[Reflection of Feelings]"
+  | "[Self-disclosure]"
+  | "[Affirmation and Reassurance]"
+  | "[Providing Suggestions]"
+  | "[Information]"
+  | "[Others]";
+
+export type Selection = Strategy | "any";
+
 function useDisplayData(url: string) {
   const fetcher: Fetcher<DisplayData> = async (url: string) =>
     fetch(url).then((res) => res.json());
 
   const { data, error, isLoading } = useSWR(url, fetcher);
 
-  const [page, onChange] = useState<number>(1);
+  const [displayData, setDisplayData] = useState<DisplayData | undefined>(data);
 
+  /* pagination */
+  const [page, onChange] = useState<number>(1);
   const displayAmount = 10;
-  const maxPage = useMemo(
-    () => (data ? Math.ceil(data?.length / displayAmount) : 1),
-    [data],
+  const [maxPage, setMaxPage] = useState<number>(
+    displayData ? Math.ceil(displayData?.length / displayAmount) : 1,
   );
-  const [displayData, setDisplayData] = useState<DisplayData | undefined>(
-    undefined,
-  );
+
+  /* filtering */
+  const [selectedLabel, setSelectedLabel] = useState<Selection>("any") as [
+    Selection,
+    (value: string) => void,
+  ];
+  const selectableLabels: string[] = [
+    "any",
+    "[Question]",
+    "[Restatement or Paraphrasing]",
+    "[Reflection of Feelings]",
+    "[Self-disclosure]",
+    "[Affirmation and Reassurance]",
+    "[Providing Suggestions]",
+    "[Information]",
+    "[Others]",
+  ];
 
   useEffect(() => {
+    const filterd =
+      selectedLabel === "any"
+        ? data
+        : data?.filter((item) => item.hypothesis.strategy === selectedLabel);
+
+    setMaxPage(filterd ? Math.ceil(filterd.length / displayAmount) : 1);
+
     setDisplayData(() =>
-      data?.slice(displayAmount * (page - 1), displayAmount * page),
+      filterd?.slice(displayAmount * (page - 1), displayAmount * page),
     );
-  }, [data, page]);
+  }, [data, page, selectedLabel]);
 
   return {
     data: displayData,
@@ -51,8 +85,13 @@ function useDisplayData(url: string) {
     pagination: {
       page,
       maxPage,
-      onChange
-    }
+      onChange,
+    },
+    filter: {
+      selectableLabels,
+      selectedLabel,
+      setSelectedLabel,
+    },
   };
 }
 
