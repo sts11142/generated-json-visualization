@@ -7,6 +7,7 @@ module.exports = {
     'plugin:react/recommended', // <--- 追記
     'plugin:react/jsx-runtime', // <--- 追記
     'plugin:react-hooks/recommended',
+    "prettier", // <--- 追記
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', 'vite.config.js'], // <--- 追記
   settings: {
