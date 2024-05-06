@@ -1,3 +1,4 @@
+import { useBoolean } from "@yamada-ui/react";
 import { useEffect, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 
@@ -40,6 +41,7 @@ function useDisplayData(url: string) {
   const { data, error, isLoading } = useSWR(url, fetcher);
 
   const [displayData, setDisplayData] = useState<DisplayData | undefined>(data);
+  const [filtered, setFiltered] = useState<DisplayData | undefined>(data);
 
   /* pagination */
   const [page, onChange] = useState<number>(1);
@@ -65,18 +67,34 @@ function useDisplayData(url: string) {
     "[Others]",
   ];
 
+  /* filter correct strategy */
+  const [isCorrectedLabel, { toggle }] = useBoolean(false);
+
   useEffect(() => {
-    const filterd =
-      selectedLabel === "any"
-        ? data
-        : data?.filter((item) => item.hypothesis.strategy === selectedLabel);
+    // filtering proccess
+    selectedLabel === "any"
+      ? setFiltered(data)
+      : setFiltered(
+          data?.filter((item) => item.hypothesis.strategy === selectedLabel),
+        );
+    if (isCorrectedLabel) {
+      setFiltered(
+        data?.filter(
+          (item) => item.hypothesis.strategy === item.reference.strategy,
+        ),
+      );
+      setSelectedLabel("any");
+    }
+  }, [data, isCorrectedLabel, selectedLabel]);
 
-    setMaxPage(filterd ? Math.ceil(filterd.length / displayAmount) : 1);
-
+  useEffect(() => {
+    // pagination proccess
+    setMaxPage(filtered ? Math.ceil(filtered.length / displayAmount) : 1);
+    // data proccess
     setDisplayData(() =>
-      filterd?.slice(displayAmount * (page - 1), displayAmount * page),
+      filtered?.slice(displayAmount * (page - 1), displayAmount * page),
     );
-  }, [data, page, selectedLabel]);
+  }, [filtered, page]);
 
   return {
     data: displayData,
@@ -91,6 +109,10 @@ function useDisplayData(url: string) {
       selectableLabels,
       selectedLabel,
       setSelectedLabel,
+    },
+    correct: {
+      isCorrectedLabel,
+      toggle,
     },
   };
 }

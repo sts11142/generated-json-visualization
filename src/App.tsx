@@ -1,7 +1,9 @@
 import {
   Box,
+  Checkbox,
   Container,
   Flex,
+  HStack,
   Option,
   Pagination,
   Select,
@@ -14,7 +16,7 @@ import { useDisplayData } from "./features/display-table/hooks/useDisplayData";
 function App() {
   const targetFileName = "20240425_02_ours1_noELoss";
 
-  const { data, loading, pagination, filter } = useDisplayData(
+  const { data, loading, pagination, filter, correct } = useDisplayData(
     `/sample-data/${targetFileName}.json`,
   );
 
@@ -44,25 +46,36 @@ function App() {
             marginInline="auto"
           />
 
-          {/* filtering strategy */}
-          <Box w="min-content" marginInline="auto">
-            <Flex gap="md" w="max-content" align="center">
-              <Text>hypothesis strategy is: </Text>
-              <Select
-                value={filter.selectedLabel}
-                onChange={filter.setSelectedLabel}
-                placeholderInOptions={false}
-                placeholder="filter Strategy"
-                defaultValue={filter.selectableLabels[0]}
-                w="sm"
-              >
-                {filter.selectableLabels.map((item) => (
-                  <Option key={item} value={item}>
-                    {item}
-                  </Option>
-                ))}
-              </Select>
-            </Flex>
+          {/* filtering for strategy */}
+          <Box marginInline="auto">
+            <HStack gap="xl">
+              <Flex gap="md" w="max-content" align="center">
+                <Text>hypothesis strategy is: </Text>
+                <Select
+                  value={filter.selectedLabel}
+                  onChange={filter.setSelectedLabel}
+                  placeholderInOptions={false}
+                  placeholder="filter Strategy"
+                  defaultValue={filter.selectableLabels[0]}
+                  w="sm"
+                >
+                  {filter.selectableLabels.map((item) => (
+                    <Option key={item} value={item}>
+                      {item}
+                    </Option>
+                  ))}
+                </Select>
+              </Flex>
+              <Box>
+                <Checkbox
+                  size="lg"
+                  isChecked={correct.isCorrectedLabel}
+                  onChange={correct.toggle}
+                >
+                  correct strategy
+                </Checkbox>
+              </Box>
+            </HStack>
           </Box>
         </VStack>
         <Container
