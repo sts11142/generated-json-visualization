@@ -1,6 +1,9 @@
 import { Box, Container } from "@yamada-ui/react";
+import { DisplayTable } from "./features/display-table";
 
 function App() {
+  const targetFileName = "20240425_02_ours1_noELoss"
+
   return (
     <>
       <Box w="full" h="full" bgColor="white">
@@ -13,7 +16,7 @@ function App() {
           borderColor="blackAlpha.400"
           borderRadius="xl"
         >
-          main contents
+          <DisplayTable targetFileName={targetFileName}/>
         </Container>
       </Box>
     </>
