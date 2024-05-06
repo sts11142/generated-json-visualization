@@ -14,16 +14,13 @@ import {
   Text,
   VStack,
 } from "@yamada-ui/react";
-import { useDisplayData } from "../hooks/useDisplayData";
+import { DisplayData } from "../hooks/useDisplayData";
 
 type DisplayTableProps = {
-  targetFileName: string;
+  data: DisplayData | undefined;
+  loading?: boolean;
 };
-function DisplayTable({ targetFileName }: DisplayTableProps) {
-  const { data, loading } = useDisplayData(
-    `/sample-data/${targetFileName}.json`,
-  );
-
+function DisplayTable({ data, loading }: DisplayTableProps) {
   return (
     <>
       {loading && <Skeleton h="xl" />}
@@ -41,6 +38,11 @@ function DisplayTable({ targetFileName }: DisplayTableProps) {
                 {/* situation */}
                 <Box>
                   <Text as="h2" fontSize="xl" letterSpacing="wider">
+                    <Text as="span" mr="md">
+                      <Tag variant="outline" size="lg" colorScheme="neutral">
+                        {data.id}
+                      </Tag>
+                    </Text>
                     {data.situation}
                   </Text>
                 </Box>
