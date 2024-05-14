@@ -20,6 +20,7 @@ type DisplayData = Array<{
     strategy: string | undefined;
     utterances: string;
   }>;
+  strategyProb: number[];
 }>;
 
 type Strategy =

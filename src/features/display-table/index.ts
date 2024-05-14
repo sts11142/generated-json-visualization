@@ -1,1 +1,1 @@
-export { DisplayTable } from "./components";
+export { DisplayTable } from "./display-table";
