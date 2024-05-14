@@ -64,7 +64,7 @@ function StrategyBarChart({ name, data }: StrategyBarChartProps) {
         withLegend
         legendProps={{ verticalAlign: "bottom", justifyContent: "center" }}
         tooltipAnimationDuration={300}
-        tooltipProps={{ position: { x: 1300, y: 0 } }}
+        tooltipProps={{ position: { x: 900, y: 0 } }}
       />
     </>
   );
