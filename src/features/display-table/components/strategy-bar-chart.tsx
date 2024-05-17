@@ -11,11 +11,11 @@ function StrategyBarChart({ name, data }: StrategyBarChartProps) {
     () => [
       /* 不明なラベル： "[Reflection of Feelings]", "[Self-disclosure]", "[Information]" */
       "[Question]",
-      "1",
-      "2",
+      "[Reflection of feelings]",
+      "[Information]",
       "[Restatement or Paraphrasing]",
       "[Others]",
-      "5",
+      "[Self-disclosure]",
       "[Affirmation and Reassurance]",
       "[Providing Suggestions]",
     ],
