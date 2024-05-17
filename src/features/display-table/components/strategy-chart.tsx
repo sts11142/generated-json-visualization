@@ -6,7 +6,7 @@ type StrategyBarChartProps = {
   name: string;
   data: number[]; // expected strategy_prob data
 };
-function StrategyBarChart({ name, data }: StrategyBarChartProps) {
+function StrategyChart({ name, data }: StrategyBarChartProps) {
   const labels = useMemo(
     () => [
       /* 不明なラベル： "[Reflection of Feelings]", "[Self-disclosure]", "[Information]" */
@@ -70,4 +70,4 @@ function StrategyBarChart({ name, data }: StrategyBarChartProps) {
   );
 }
 
-export { StrategyBarChart };
+export { StrategyChart };

@@ -22,7 +22,7 @@ import {
   VStack,
 } from "@yamada-ui/react";
 import { DisplayData } from "./hooks/useDisplayData";
-import { StrategyBarChart } from "./components";
+import { StrategyChart } from "./components";
 import { useMemo } from "react";
 
 type DisplayTableProps = {
@@ -171,7 +171,7 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                       <AccordionPanel>
                         <VStack pt="md">
                           <Box>
-                            <StrategyBarChart
+                            <StrategyChart
                               name={`target: ${data.id}`}
                               data={data.strategyProb.map((item) =>
                                 Number(item.toFixed(4)),

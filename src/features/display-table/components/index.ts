@@ -1,1 +1,1 @@
-export { StrategyBarChart } from "./strategy-bar-chart";
+export { StrategyChart } from "./strategy-chart";
