@@ -3,7 +3,6 @@ import { AreaChart, AreaProps } from "@yamada-ui/charts";
 import { useMemo } from "react";
 
 type StrategyBarChartProps = {
-  name: string;
   data: number[]; // expected strategy_prob data  [0.2347840815782547, 0.14163683354854584, 0.010241687297821045, 0.1956576108932495, ...]
   baselineData: number[];
   referenceStrategyIdx: number;
