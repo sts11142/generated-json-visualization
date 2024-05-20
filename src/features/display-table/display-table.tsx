@@ -139,7 +139,10 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                     borderColor="blackAlpha.300"
                   >
                     <VStack pl="sm">
-                      <Grid templateColumns="min-content min-content 1fr">
+                      <Grid
+                        templateColumns="min-content min-content 1fr"
+                        alignItems="center"
+                      >
                         <GridItem w="8rem">
                           <Text fontSize="lg">reference</Text>
                         </GridItem>
@@ -155,7 +158,10 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
 
                       <Divider color="blackAlpha.300" />
 
-                      <Grid templateColumns="min-content min-content 1fr">
+                      <Grid
+                        templateColumns="min-content min-content 1fr"
+                        alignItems="center"
+                      >
                         <GridItem w="8rem">
                           <Text fontSize="lg">baseline</Text>
                         </GridItem>
@@ -173,7 +179,10 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
 
                       <Divider />
 
-                      <Grid templateColumns="min-content min-content 1fr">
+                      <Grid
+                        templateColumns="min-content min-content 1fr"
+                        alignItems="center"
+                      >
                         <GridItem w="8rem">
                           <Text fontSize="lg">ours</Text>
                         </GridItem>
