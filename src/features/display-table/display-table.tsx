@@ -5,6 +5,7 @@ import {
   AccordionLabel,
   AccordionPanel,
   Box,
+  Card,
   Container,
   Divider,
   Grid,
@@ -34,11 +35,11 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
     () => [
       /* 不明なラベル： "[Reflection of Feelings]", "[Self-disclosure]", "[Information]" */
       "[Question]",
-      "1",
-      "2",
+      "[Reflection of feelings]",
+      "[Information]",
       "[Restatement or Paraphrasing]",
       "[Others]",
-      "6",
+      "[Self-disclosure]",
       "[Affirmation and Reassurance]",
       "[Providing Suggestions]",
     ],
@@ -111,10 +112,7 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                                   {conv.speaker}
                                 </Tag>
                                 {conv.speaker === "supporter" ? (
-                                  <Text
-                                    w="10rem"
-                                    color="neutral.400"
-                                  >
+                                  <Text w="10rem" color="neutral.400">
                                     {conv.strategy}
                                   </Text>
                                 ) : null}
@@ -134,31 +132,62 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
 
                 {/* strategy */}
                 <Box>
-                  <VStack pl="sm">
-                    <Grid templateColumns="min-content 1fr">
-                      <GridItem w="18rem">
-                        <Text fontSize="lg">{data.reference.strategy}</Text>
-                      </GridItem>
-                      <GridItem>
-                        <Text fontSize="xl" letterSpacing="wider">
-                          {data.reference.response}
-                        </Text>
-                      </GridItem>
-                    </Grid>
+                  <Card
+                    p="md"
+                    boxShadow="none"
+                    border="2px solid"
+                    borderColor="blackAlpha.300"
+                  >
+                    <VStack pl="sm">
+                      <Grid templateColumns="min-content min-content 1fr">
+                        <GridItem w="8rem">
+                          <Text fontSize="lg">reference</Text>
+                        </GridItem>
+                        <GridItem w="18rem">
+                          <Text fontSize="lg">{data.reference.strategy}</Text>
+                        </GridItem>
+                        <GridItem>
+                          <Text fontSize="xl" letterSpacing="wider">
+                            {data.reference.response}
+                          </Text>
+                        </GridItem>
+                      </Grid>
 
-                    <Divider color="blackAlpha.300" />
+                      <Divider color="blackAlpha.300" />
 
-                    <Grid templateColumns="min-content 1fr">
-                      <GridItem w="18rem">
-                        <Text fontSize="lg">{data.hypothesis.strategy}</Text>
-                      </GridItem>
-                      <GridItem>
-                        <Text fontSize="xl" letterSpacing="wider">
-                          {data.hypothesis.response}
-                        </Text>
-                      </GridItem>
-                    </Grid>
-                  </VStack>
+                      <Grid templateColumns="min-content min-content 1fr">
+                        <GridItem w="8rem">
+                          <Text fontSize="lg">baseline</Text>
+                        </GridItem>
+                        <GridItem w="18rem">
+                          <Text fontSize="lg">
+                            {data.hypothesisBL.strategy}
+                          </Text>
+                        </GridItem>
+                        <GridItem>
+                          <Text fontSize="xl" letterSpacing="wider">
+                            {data.hypothesisBL.response}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+
+                      <Divider />
+
+                      <Grid templateColumns="min-content min-content 1fr">
+                        <GridItem w="8rem">
+                          <Text fontSize="lg">ours</Text>
+                        </GridItem>
+                        <GridItem w="18rem">
+                          <Text fontSize="lg">{data.hypothesis.strategy}</Text>
+                        </GridItem>
+                        <GridItem>
+                          <Text fontSize="xl" letterSpacing="wider">
+                            {data.hypothesis.response}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+                    </VStack>
+                  </Card>
                 </Box>
 
                 {/* strategy_prob */}
@@ -172,9 +201,14 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                         <VStack pt="md">
                           <Box>
                             <StrategyChart
-                              name={`target: ${data.id}`}
                               data={data.strategyProb.map((item) =>
-                                Number(item.toFixed(4)),
+                                Number(`${(item * 100).toFixed(2)}`),
+                              )}
+                              baselineData={data.strategyProbBL.map((item) =>
+                                Number(`${(item * 100).toFixed(2)}`),
+                              )}
+                              referenceStrategyIdx={labels.indexOf(
+                                data.reference.strategy,
                               )}
                             />
                           </Box>

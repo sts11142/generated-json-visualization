@@ -13,6 +13,10 @@ type DisplayData = Array<{
     strategy: string;
     response: string;
   };
+  hypothesisBL: {
+    strategy: string;
+    response: string;
+  };
   conversations: Array<{
     speaker: "seeker" | "supporter";
     emotion: string;
@@ -21,6 +25,7 @@ type DisplayData = Array<{
     utterances: string;
   }>;
   strategyProb: number[];
+  strategyProbBL: number[];
 }>;
 
 type Strategy =
