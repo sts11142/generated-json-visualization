@@ -27,10 +27,17 @@ import { StrategyChart } from "./components";
 import { useMemo } from "react";
 
 type DisplayTableProps = {
-  data: DisplayData | undefined;
+  targetData: DisplayData | undefined;
+  baselineData: DisplayData | undefined;
+  comparisonDatas: Array<{ name: string; data: DisplayData | undefined }>;
   loading?: boolean;
 };
-function DisplayTable({ data, loading }: DisplayTableProps) {
+function DisplayTable({
+  targetData,
+  baselineData,
+  comparisonDatas,
+  loading,
+}: DisplayTableProps) {
   const labels = useMemo(
     () => [
       /* 不明なラベル： "[Reflection of Feelings]", "[Self-disclosure]", "[Information]" */
@@ -51,8 +58,8 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
       {loading && <Skeleton h="xl" />}
       <VStack gap="3xl">
         {!loading &&
-          data &&
-          data.map((data) => (
+          targetData &&
+          targetData.map((data, corpusIdx) => (
             <Container
               key={data.id}
               border="1px solid"
@@ -167,12 +174,14 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                         </GridItem>
                         <GridItem w="18rem">
                           <Text fontSize="lg">
-                            {data.hypothesisBL.strategy}
+                            {baselineData &&
+                              baselineData[corpusIdx].hypothesis.strategy}
                           </Text>
                         </GridItem>
                         <GridItem>
                           <Text fontSize="xl" letterSpacing="wider">
-                            {data.hypothesisBL.response}
+                            {baselineData &&
+                              baselineData[corpusIdx].hypothesis.response}
                           </Text>
                         </GridItem>
                       </Grid>
@@ -184,7 +193,7 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                         alignItems="center"
                       >
                         <GridItem w="8rem">
-                          <Text fontSize="lg">ours</Text>
+                          <Text fontSize="lg">ours1-series</Text>
                         </GridItem>
                         <GridItem w="18rem">
                           <Text fontSize="lg">{data.hypothesis.strategy}</Text>
@@ -195,6 +204,36 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                           </Text>
                         </GridItem>
                       </Grid>
+
+                      {comparisonDatas.map((item) => (
+                        <>
+                          <Divider key={item.name} />
+
+                          <Grid
+                            key={item.name}
+                            templateColumns="min-content min-content 1fr"
+                            alignItems="center"
+                          >
+                            <GridItem w="8rem">
+                              <Text fontSize="lg">{item.name}</Text>
+                            </GridItem>
+                            <GridItem w="18rem">
+                              <Text fontSize="lg">
+                                {item && item.data
+                                  ? item.data[corpusIdx].hypothesis.strategy
+                                  : "no data"}
+                              </Text>
+                            </GridItem>
+                            <GridItem>
+                              <Text fontSize="xl" letterSpacing="wider">
+                                {item && item.data
+                                  ? item.data[corpusIdx].hypothesis.response
+                                  : "no data"}
+                              </Text>
+                            </GridItem>
+                          </Grid>
+                        </>
+                      ))}
                     </VStack>
                   </Card>
                 </Box>
@@ -213,9 +252,37 @@ function DisplayTable({ data, loading }: DisplayTableProps) {
                               data={data.strategyProb.map((item) =>
                                 Number(`${(item * 100).toFixed(2)}`),
                               )}
-                              baselineData={data.strategyProbBL.map((item) =>
-                                Number(`${(item * 100).toFixed(2)}`),
-                              )}
+                              baselineData={
+                                baselineData
+                                  ? baselineData[corpusIdx].strategyProb.map(
+                                      (item) =>
+                                        Number(`${(item * 100).toFixed(2)}`),
+                                    )
+                                  : Array.from(new Array(8).fill(0.0))
+                              }
+                              probComparisons={
+                                comparisonDatas
+                                  ? comparisonDatas.map((item) =>
+                                      item.data
+                                        ? {
+                                            name: item.name,
+                                            data: item.data[
+                                              corpusIdx
+                                            ].strategyProb.map((item) =>
+                                              Number(
+                                                `${(item * 100).toFixed(2)}`,
+                                              ),
+                                            ),
+                                          }
+                                        : {
+                                            name: item.name,
+                                            data: Array.from(
+                                              new Array(8).fill(0.0),
+                                            ),
+                                          },
+                                    )
+                                  : undefined
+                              }
                               referenceStrategyIdx={labels.indexOf(
                                 data.reference.strategy,
                               )}

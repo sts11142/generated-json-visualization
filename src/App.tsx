@@ -12,12 +12,41 @@ import {
 } from "@yamada-ui/react";
 import { DisplayTable } from "./features/display-table";
 import { useDisplayData } from "./features/display-table/hooks/useDisplayData";
+import { useMemo } from "react";
 
 function App() {
-  const targetFileName = "20240425_02_ours1_noELoss";
+  const targetNames = [
+    "baseline",
+    "ours1-series",
+    "ours1-parallel-mlp",
+    "ours1-parallel-res",
+  ];
+  const targetFiles = targetNames.map((name) => `/sample-data/${name}.json`);
 
-  const { data, loading, pagination, filter, correct } = useDisplayData(
-    `/sample-data/${targetFileName}.json`,
+  const {
+    data: ours1seriesData,
+    loading,
+    pagination,
+    filter,
+    correct,
+  } = useDisplayData(targetFiles[1]);
+
+  const { data: baselineData } = useDisplayData(targetFiles[0]);
+  const { data: ours1parallelmlp } = useDisplayData(targetFiles[2]);
+  const { data: ours1parallelres } = useDisplayData(targetFiles[3]);
+
+  const comparableDatas = useMemo(
+    () => [
+      {
+        name: "ours1-paralell-res",
+        data: ours1parallelres,
+      },
+      {
+        name: "ours1-parallel-mlp",
+        data: ours1parallelmlp,
+      },
+    ],
+    [ours1parallelmlp, ours1parallelres],
   );
 
   return (
@@ -87,7 +116,12 @@ function App() {
           borderColor="blackAlpha.400"
           borderRadius="xl"
         >
-          <DisplayTable data={data} loading={loading} />
+          <DisplayTable
+            targetData={ours1seriesData}
+            baselineData={baselineData}
+            comparisonDatas={comparableDatas}
+            loading={loading}
+          />
         </Container>
       </Box>
     </>
