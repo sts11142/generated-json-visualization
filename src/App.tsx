@@ -15,13 +15,13 @@ import { useDisplayData } from "./features/display-table/hooks/useDisplayData";
 import { useMemo } from "react";
 
 function App() {
-  const targetNames = [
+  const models = [
     "baseline",
     "ours1-series",
     "ours1-parallel-mlp",
     "ours1-parallel-res",
   ];
-  const targetFiles = targetNames.map((name) => `/sample-data/${name}.json`);
+  const targetFiles = models.map((name) => `/sample-data/${name}.json`);
 
   const {
     data: ours1seriesData,

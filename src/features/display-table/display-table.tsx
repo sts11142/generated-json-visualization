@@ -22,14 +22,14 @@ import {
   Tr,
   VStack,
 } from "@yamada-ui/react";
-import { DisplayData } from "./hooks/useDisplayData";
+import { Dialogue } from "./hooks/useDisplayData";
 import { StrategyChart } from "./components";
 import { useMemo } from "react";
 
 type DisplayTableProps = {
-  targetData: DisplayData | undefined;
-  baselineData: DisplayData | undefined;
-  comparisonDatas: Array<{ name: string; data: DisplayData | undefined }>;
+  targetData: Dialogue[] | undefined;
+  baselineData: Dialogue[] | undefined;
+  comparisonDatas: Array<{ name: string; data: Dialogue[] | undefined }>;
   loading?: boolean;
 };
 function DisplayTable({

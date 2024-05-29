@@ -1,8 +1,8 @@
 import { useBoolean } from "@yamada-ui/react";
-import { useEffect, useState } from "react";
-import useSWR, { Fetcher } from "swr";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 
-type DisplayData = Array<{
+type Dialogue = {
   id: number;
   situation: string;
   reference: {
@@ -21,7 +21,16 @@ type DisplayData = Array<{
     utterances: string;
   }>;
   strategyProb: number[];
-}>;
+};
+
+type ModelData = {
+  name: string;
+  data: Dialogue[];
+};
+
+type DisplayDataMap = {
+  [key: string]: ModelData;
+};
 
 type Strategy =
   | "[Question]"
@@ -35,70 +44,147 @@ type Strategy =
 
 export type Selection = Strategy | "any";
 
-function useDisplayData(url: string) {
-  const fetcher: Fetcher<DisplayData> = async (url: string) =>
-    fetch(url).then((res) => res.json());
+const fetcher = (urls: string[]) => {
+  const f = (url: string) =>
+    fetch(url).then((res) => res.json() as unknown as Dialogue[]);
+  return Promise.all(urls.map(f));
+};
 
-  const { data, error, isLoading } = useSWR(url, fetcher);
+type UseResultDataProps = {
+  data: DisplayDataMap;
+  error: Error | undefined;
+  isLoading: boolean;
+};
+const useResultData = (models: string[]): UseResultDataProps => {
+  const files = models.map((model) => `/sample-data/${model}.json`);
+  const { data: jsonData, error, isLoading } = useSWR(files, fetcher);
 
-  const [displayData, setDisplayData] = useState<DisplayData | undefined>(data);
-  const [filtered, setFiltered] = useState<DisplayData | undefined>(data);
+  const dataMap: DisplayDataMap = {};
+  models.forEach((model, idx) => {
+    dataMap[model].name = model;
+    dataMap[model].data = jsonData ? jsonData[idx] : ([] as Dialogue[]);
+  });
 
-  /* pagination */
-  const [page, onChange] = useState<number>(1);
-  const displayAmount = 10;
-  const [maxPage, setMaxPage] = useState<number>(
-    displayData ? Math.ceil(displayData?.length / displayAmount) : 1,
-  );
+  return { data: dataMap, error, isLoading };
+};
+
+/* 表示用データを提供する */
+function useDisplayData(models: string[]) {
+  const { data: displayData, isLoading, error } = useResultData(models);
 
   /* filtering */
-  const [selectedLabel, setSelectedLabel] = useState<Selection>("any") as [
+  const [filterdDisplayData, setFilteredDisplayData] =
+    useState<DisplayDataMap>(displayData);
+  const [targetModelName, setTargetModelName] = useState<ModelData["name"]>(
+    displayData[models[0]].name,
+  );
+  const [targetLabel, setTargetLabel] = useState<Selection>("any") as [
     Selection,
     (value: string) => void,
   ];
-  const selectableLabels: string[] = [
-    "any",
-    "[Question]",
-    "[Restatement or Paraphrasing]",
-    "[Reflection of Feelings]",
-    "[Self-disclosure]",
-    "[Affirmation and Reassurance]",
-    "[Providing Suggestions]",
-    "[Information]",
-    "[Others]",
-  ];
+  const [isCorrectedLabel, { toggle }] = useBoolean(false); // filter correct strategy
+  const [targetDialogueIds, setTmpTargetDialogueIds] = useState<
+    Array<Dialogue["id"]>
+  >([]);
 
-  /* filter correct strategy */
-  const [isCorrectedLabel, { toggle }] = useBoolean(false);
+  /* pagination */
+  const displayAmount = 10;
+  const [page, onChange] = useState<number>(1);
+  const [maxPage, setMaxPage] = useState<number>(
+    filterdDisplayData && filterdDisplayData[targetModelName]
+      ? Math.ceil(
+          filterdDisplayData[targetModelName].data.length / displayAmount,
+        )
+      : 1,
+  );
 
+  const selectableModelNames: string[] = models;
+  const selectableLabels: string[] = useMemo(
+    () => [
+      "any",
+      "[Question]",
+      "[Restatement or Paraphrasing]",
+      "[Reflection of Feelings]",
+      "[Self-disclosure]",
+      "[Affirmation and Reassurance]",
+      "[Providing Suggestions]",
+      "[Information]",
+      "[Others]",
+    ],
+    [],
+  );
+
+  /* filtering handler */
+  const hadleChangeTargetModel = useCallback(
+    (modelName: ModelData["name"]) => {
+      if (!filterdDisplayData) {
+        return;
+      }
+      setTargetModelName(() => filterdDisplayData[modelName].name);
+    },
+    [filterdDisplayData],
+  );
+
+  const handleChangeTargetLabel = useCallback((label: Selection) => {
+    setTargetLabel(label);
+  }, []);
+
+  const handleToggleIsCorrected = useCallback(() => toggle(), [toggle]);
+
+  /* update filteredData when dependencies changed */
   useEffect(() => {
-    // filtering proccess
-    selectedLabel === "any"
-      ? setFiltered(data)
-      : setFiltered(
-          data?.filter((item) => item.hypothesis.strategy === selectedLabel),
-        );
-    if (isCorrectedLabel) {
-      setFiltered(
-        data?.filter(
-          (item) => item.hypothesis.strategy === item.reference.strategy,
-        ),
-      );
-      setSelectedLabel("any");
-    }
-  }, [data, isCorrectedLabel, selectedLabel]);
+    // filtering by target label
+    if (targetLabel === "any") {
+      setFilteredDisplayData(displayData);
+    } else {
+      const tmpTargetDialogueIds: Array<Dialogue["id"]> = [];
+      // search target dialogue ids (hyp.label === targetLabel) in target model
+      displayData[targetModelName].data.forEach((dialogue: Dialogue) => {
+        if (isCorrectedLabel) {
+          dialogue.hypothesis.strategy === targetLabel &&
+          dialogue.hypothesis.strategy === dialogue.reference.strategy
+            ? tmpTargetDialogueIds.push(dialogue.id)
+            : null;
+        } else {
+          dialogue.hypothesis.strategy === targetLabel
+            ? tmpTargetDialogueIds.push(dialogue.id)
+            : null;
+        }
+      });
+      setTmpTargetDialogueIds(() => tmpTargetDialogueIds);
 
+      // filter data in order to match tmpTargetDialogueIds
+      //   and store new display data have target dialogue
+      const newDataMap: DisplayDataMap = { ...displayData };
+      Object.keys(displayData).forEach((modelName: string) => {
+        newDataMap[modelName].data = displayData[modelName].data.filter(
+          (dialogue: Dialogue) => tmpTargetDialogueIds.includes(dialogue.id),
+        );
+      });
+      setFilteredDisplayData(() => ({ ...newDataMap }));
+    }
+  }, [displayData, isCorrectedLabel, targetLabel, targetModelName]);
+
+  // data filtering後にペジネーション状態を更新する
   useEffect(() => {
     // pagination proccess
-    setMaxPage(filtered ? Math.ceil(filtered.length / displayAmount) : 1);
+    setMaxPage(() => Math.ceil(targetDialogueIds.length / displayAmount));
     // data proccess
-    setDisplayData(() =>
-      filtered?.slice(displayAmount * (page - 1), displayAmount * page),
-    );
-  }, [filtered, page]);
+    setFilteredDisplayData((prev) => {
+      // filtered?.slice(displayAmount * (page - 1), displayAmount * page),
+      const newDataMap = { ...prev };
+      Object.keys(prev).forEach((modelName) => {
+        newDataMap[modelName].data = prev[modelName].data.slice(
+          displayAmount * (page - 1),
+          displayAmount * page,
+        );
+      });
+      return newDataMap;
+    });
+  }, [page, targetDialogueIds.length]);
 
   return {
-    data: displayData,
+    data: filterdDisplayData,
     error,
     loading: isLoading,
     pagination: {
@@ -107,15 +193,18 @@ function useDisplayData(url: string) {
       onChange,
     },
     filter: {
+      selectableModelNames,
+      targetModelName,
+      hadleChangeTargetModel,
       selectableLabels,
-      selectedLabel,
-      setSelectedLabel,
+      targetLabel,
+      handleChangeTargetLabel,
     },
     correct: {
       isCorrectedLabel,
-      toggle,
+      handleToggleIsCorrected,
     },
   };
 }
 
-export { useDisplayData, type DisplayData };
+export { useDisplayData, type Dialogue };
