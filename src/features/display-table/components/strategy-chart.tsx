@@ -34,10 +34,10 @@ function StrategyChart({
       probComparisons
         ? [
             { dataKey: "reference", color: "gray.500" },
-            { dataKey: probComparisons[1].name, color: "cyan.100" },
-            { dataKey: probComparisons[0].name, color: "violet.300" },
             { dataKey: "baseline", color: "red.500" },
             { dataKey: "ours1", color: "blue.500" },
+            { dataKey: probComparisons[0].name, color: "violet.300" },
+            { dataKey: probComparisons[1].name, color: "cyan.100" },
           ]
         : [],
     [probComparisons],
@@ -71,24 +71,10 @@ function StrategyChart({
 
   return (
     <>
-      {/* <BarChart
-        data={processedData}
-        series={series}
-        dataKey="name"
-        size="full"
-        valueFormatter={(value) => `${(value * 100).toFixed(2)}`}
-        unit="%"
-        withLegend
-        legendProps={{ verticalAlign: "bottom", justifyContent: "center" }}
-        tooltipAnimationDuration={300}
-        tooltipProps={{ position: { x: 900, y: 0 } }}
-      /> */}
-
       <AreaChart
         data={processedData}
         series={series}
         dataKey="name"
-        // curveType="linear"
         unit="%"
       />
     </>
