@@ -15,38 +15,23 @@ import { useDisplayData } from "./features/display-table/hooks/useDisplayData";
 import { useMemo } from "react";
 
 function App() {
-  const models = [
-    "baseline",
-    "ours1-series",
-    "ours1-parallel-mlp",
-    "ours1-parallel-res",
-  ];
-  const targetFiles = models.map((name) => `/sample-data/${name}.json`);
+  const modelNames = useMemo(
+    () => [
+      "baseline",
+      "ours1-series",
+      "ours1-parallel-res",
+      "ours1-parallel-mlp",
+    ],
+    [],
+  );
+  const [baseline, target, cmpr1, cmpr2] = modelNames;
 
-  const {
-    data: ours1seriesData,
-    loading,
-    pagination,
-    filter,
-    correct,
-  } = useDisplayData(targetFiles[1]);
-
-  const { data: baselineData } = useDisplayData(targetFiles[0]);
-  const { data: ours1parallelmlp } = useDisplayData(targetFiles[2]);
-  const { data: ours1parallelres } = useDisplayData(targetFiles[3]);
+  const { displayData, loading, pagination, filter, correct } =
+    useDisplayData(modelNames);
 
   const comparableDatas = useMemo(
-    () => [
-      {
-        name: "ours1-paralell-res",
-        data: ours1parallelres,
-      },
-      {
-        name: "ours1-parallel-mlp",
-        data: ours1parallelmlp,
-      },
-    ],
-    [ours1parallelmlp, ours1parallelres],
+    () => [displayData[cmpr1], displayData[cmpr2]],
+    [cmpr1, cmpr2, displayData],
   );
 
   return (
@@ -79,10 +64,23 @@ function App() {
           <Box marginInline="auto">
             <HStack gap="xl">
               <Flex gap="md" w="max-content" align="center">
-                <Text>hypothesis strategy is: </Text>
                 <Select
-                  value={filter.selectedLabel}
-                  onChange={filter.setSelectedLabel}
+                  value={filter.targetModelName}
+                  onChange={filter.onChangeTargetModelName}
+                  placeholderInOptions={false}
+                  defaultValue={filter.selectableModelNames[0]}
+                  w="sm"
+                >
+                  {filter.selectableModelNames.map((name) => (
+                    <Option key={name} value={name}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+                <Text>-</Text>
+                <Select
+                  value={filter.targetLabel}
+                  onChange={filter.onChangeTargetLabel}
                   placeholderInOptions={false}
                   placeholder="filter Strategy"
                   defaultValue={filter.selectableLabels[0]}
@@ -99,9 +97,9 @@ function App() {
                 <Checkbox
                   size="lg"
                   isChecked={correct.isCorrectedLabel}
-                  onChange={correct.toggle}
+                  onChange={correct.onChangeIsCorrectedLabel}
                 >
-                  correct strategy
+                  correct prediction
                 </Checkbox>
               </Box>
             </HStack>
@@ -117,8 +115,8 @@ function App() {
           borderRadius="xl"
         >
           <DisplayTable
-            targetData={ours1seriesData}
-            baselineData={baselineData}
+            targetData={displayData[target]}
+            baselineData={displayData[baseline]}
             comparisonDatas={comparableDatas}
             loading={loading}
           />
