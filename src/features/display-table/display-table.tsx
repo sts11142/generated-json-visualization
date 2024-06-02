@@ -146,6 +146,7 @@ function DisplayTable({
                     borderColor="blackAlpha.300"
                   >
                     <VStack pl="sm">
+                      {/* reference */}
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
@@ -163,6 +164,7 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
+                      {/* baseline */}
                       <Divider color="blackAlpha.300" />
 
                       <Grid
@@ -186,6 +188,7 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
+                      {/* target */}
                       <Divider />
 
                       <Grid

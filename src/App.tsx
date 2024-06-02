@@ -18,6 +18,7 @@ function App() {
   const targetNames = [
     "baseline",
     "ours1-series",
+    "ours1-series-cog",
     "ours1-parallel-mlp",
     "ours1-parallel-res",
   ];
@@ -32,11 +33,16 @@ function App() {
   } = useDisplayData(targetFiles[1]);
 
   const { data: baselineData } = useDisplayData(targetFiles[0]);
-  const { data: ours1parallelmlp } = useDisplayData(targetFiles[2]);
-  const { data: ours1parallelres } = useDisplayData(targetFiles[3]);
+  const { data: ours1serieslight } = useDisplayData(targetFiles[2]);
+  const { data: ours1parallelmlp } = useDisplayData(targetFiles[3]);
+  const { data: ours1parallelres } = useDisplayData(targetFiles[4]);
 
   const comparableDatas = useMemo(
     () => [
+      {
+        name: "ours1-series-cog",
+        data: ours1serieslight,
+      },
       {
         name: "ours1-paralell-res",
         data: ours1parallelres,
@@ -46,7 +52,7 @@ function App() {
         data: ours1parallelmlp,
       },
     ],
-    [ours1parallelmlp, ours1parallelres],
+    [ours1parallelmlp, ours1parallelres, ours1serieslight],
   );
 
   return (

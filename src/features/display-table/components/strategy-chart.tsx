@@ -34,10 +34,11 @@ function StrategyChart({
       probComparisons
         ? [
             { dataKey: "reference", color: "gray.500" },
-            { dataKey: probComparisons[1].name, color: "cyan.100" },
-            { dataKey: probComparisons[0].name, color: "violet.300" },
             { dataKey: "baseline", color: "red.500" },
-            { dataKey: "ours1", color: "blue.500" },
+            { dataKey: "ours1-series", color: "blue.500" },
+            { dataKey: probComparisons[0].name, color: "green.400" },
+            { dataKey: probComparisons[1].name, color: "violet.300" },
+            { dataKey: probComparisons[2].name, color: "cyan.100" },
           ]
         : [],
     [probComparisons],
@@ -51,7 +52,7 @@ function StrategyChart({
       probComparisons
         ? result.push({
             name: labels[order],
-            ours1: data[order],
+            "ours1-series": data[order],
             baseline: baselineData[order],
             [probComparisons[0].name]:
               probComparisons && probComparisons[0].data
@@ -60,6 +61,10 @@ function StrategyChart({
             [probComparisons[1].name]:
               probComparisons && probComparisons[1].data
                 ? probComparisons[1].data[order]
+                : 0.0,
+            [probComparisons[2].name]:
+              probComparisons && probComparisons[2].data
+                ? probComparisons[2].data[order]
                 : 0.0,
             reference: referenceStrategyIdx === order ? 100.0 : 0.0,
           })
@@ -88,7 +93,8 @@ function StrategyChart({
         data={processedData}
         series={series}
         dataKey="name"
-        // curveType="linear"
+        curveType="linear"
+        // curveType="step"
         unit="%"
       />
     </>
