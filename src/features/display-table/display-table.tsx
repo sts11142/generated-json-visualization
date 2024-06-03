@@ -219,14 +219,14 @@ function DisplayTable({
                             </GridItem>
                             <GridItem w="18rem">
                               <Text fontSize="lg">
-                                {model && model.data
+                                {loading
                                   ? model.data[corpusIdx].hypothesis.strategy
                                   : "no data"}
                               </Text>
                             </GridItem>
                             <GridItem>
                               <Text fontSize="xl" letterSpacing="wider">
-                                {model && model.data
+                                {loading
                                   ? model.data[corpusIdx].hypothesis.response
                                   : "no data"}
                               </Text>
@@ -259,10 +259,14 @@ function DisplayTable({
                               )}
                               probComparisons={comparisonDatas.map((model) => ({
                                 name: model.name,
-                                data: model.data[corpusIdx].strategyProb.map(
-                                  (probValue) =>
-                                    Number(`${(probValue * 100).toFixed(2)}`),
-                                ),
+                                data: loading
+                                  ? model.data[corpusIdx].strategyProb.map(
+                                      (probValue) =>
+                                        Number(
+                                          `${(probValue * 100).toFixed(2)}`,
+                                        ),
+                                    )
+                                  : Array.from(new Array(8).fill(0.0)),
                               }))}
                               referenceStrategyIdx={labels.indexOf(
                                 dialogue.reference.strategy,
