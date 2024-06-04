@@ -64,8 +64,7 @@ const useResultData = (models: string[]): UseResultDataProps => {
   models.forEach((model, idx) => {
     dataMap[model] = {
       name: model,
-      data: jsonData ? jsonData[idx] : ([] as Dialogue[])
-      // data: jsonData ? jsonData[idx].slice(0, 21) : ([] as Dialogue[]),
+      data: jsonData ? jsonData[idx] : ([] as Dialogue[]),
     };
   });
 
@@ -78,13 +77,9 @@ const useResultData = (models: string[]): UseResultDataProps => {
         newDataMap[model] = {
           name: model,
           data: jsonData ? jsonData[idx] : ([] as Dialogue[]),
-          // data: jsonData ? jsonData[idx].slice(0, 21) : ([] as Dialogue[]),
         };
       });
-
       setDisplayData(newDataMap);
-      console.log("load: ", displayData);
-      console.log("\n\n");
     }
   }, [isLoading, jsonData, models]);
 
@@ -96,9 +91,9 @@ function useDisplayData(models: string[]) {
   const { data: displayData, isLoading, error } = useResultData(models);
 
   /* filtering */
-  const [filterdDisplayData, setFilteredDisplayData] = useState<DisplayDataMap>(
-    { ...displayData },
-  );
+  const [filteredData, setFilteredData] = useState<DisplayDataMap>(displayData); // データフィルタリングの中間データ
+  const [filterdDisplayData, setFilteredDisplayData] =
+    useState<DisplayDataMap>(displayData);
   const [targetModelName, setTargetModelName] = useState<ModelData["name"]>(
     models[0],
   );
@@ -129,28 +124,11 @@ function useDisplayData(models: string[]) {
     [],
   );
 
-  // const handleChangeModelName = useCallback(() => {
-  //   handleFilteringData();
-  //   // handleChangePage();
-  //   return setTargetModelName;
-  // }, [handleFilteringData]);
-
-  // const handleChangeLabel = useCallback(() => {
-  //   handleFilteringData();
-  //   handleChangePage();
-  //   return setTargetLabel;
-  // }, [handleFilteringData]);
-
   /* update filteredData when dependencies changed */
   useEffect(() => {
-    console.log("filtering start");
-
     if (!isLoading) {
       /* filtering by target label */
       const tmpTargetDialogueIds: Array<Dialogue["id"]> = [];
-
-      // console.log("display data: ", displayData);
-
       // search target dialogue ids (hyp.label === targetLabel) in target model
       displayData[targetModelName].data.forEach((dialogue: Dialogue) => {
         const isTargetLabel =
@@ -163,22 +141,9 @@ function useDisplayData(models: string[]) {
         isTargetLabel && isCorrect
           ? tmpTargetDialogueIds.push(dialogue.id)
           : null;
-
-        // console.log("isCorrect: ", isCorrect);
-        // console.log("isTargetLabel: ", isTargetLabel);
       });
-      // console.log("tmp target dialogues: ", tmpTargetDialogueIds);
-      // setTargetDialogueIds(tmpTargetDialogueIds);
-
       // filter data in order to match tmpTargetDialogueIds
       //   and store new display data have target dialogue
-      // console.log("display data: ", displayData);
-      // const newDataMap: DisplayDataMap = { ...displayData };
-      // Object.keys(displayData).forEach((modelName: string) => {
-      //   newDataMap[modelName].data = displayData[modelName].data.filter(
-      //     (dialogue: Dialogue) => tmpTargetDialogueIds.includes(dialogue.id),
-      //   );
-      // });
       const newDataMap: DisplayDataMap = Object.keys(displayData).reduce(
         (acc, modelName) => {
           acc[modelName] = {
@@ -191,59 +156,46 @@ function useDisplayData(models: string[]) {
         },
         {} as DisplayDataMap,
       );
-      setFilteredDisplayData(() => ({ ...newDataMap }));
-      // console.log("display data: ", displayData);
-      // console.log("newDatamap", newDataMap);
-      // console.log(targetModelName, targetLabel);
-
-      console.log("filtering end");
-      console.log("\n\n");
+      // pagination max length
+      setMaxPage(() =>
+        Math.ceil(newDataMap[targetModelName].data.length / displayAmount),
+      );
+      setFilteredData(newDataMap);
     }
-  }, [displayData, isCorrectedLabel, isLoading, targetLabel, targetModelName]);
+  }, [
+    displayData,
+    page,
+    isCorrectedLabel,
+    isLoading,
+    targetLabel,
+    targetModelName,
+    displayAmount,
+  ]);
 
   /* handle changing page */
   useEffect(() => {
-    console.log("pagination start");
-    // console.log("bef data: ", displayData);
-
     if (!isLoading) {
-      // console.log("bef data: ", displayData);
-
-      // pagination max length
-      setMaxPage(() =>
-        Math.ceil(displayData[targetModelName].data.length / displayAmount),
-      );
-
-      // console.log(Object.keys(filterdDisplayData));
-      // console.log(
-      //   "max page: ",
-      //   Math.ceil(displayData[targetModelName].data.length / displayAmount),
-      // );
-      // console.log("page: ", page);
-      // console.log(
-      //   `in filtering, ${displayAmount * (page - 1)} ~ ${displayAmount * page}`,
-      // );
-      // console.log("bef data: ", displayData);
-
       // data slice for one page amount
-      const newDataMap = Object.keys(displayData).reduce((acc, modelName) => {
+      let pageNum: number;
+      if (page <= maxPage) {
+        pageNum = page;
+      } else {
+        pageNum = 1;
+        onChange(pageNum);
+      }
+      const newDataMap = Object.keys(filteredData).reduce((acc, modelName) => {
         acc[modelName] = {
-          ...displayData[modelName],
-          data: displayData[modelName].data.slice(
-            displayAmount * (page - 1),
-            displayAmount * page,
+          ...filteredData[modelName],
+          data: filteredData[modelName].data.slice(
+            displayAmount * (pageNum - 1),
+            displayAmount * pageNum,
           ),
         };
         return acc;
       }, {} as DisplayDataMap);
-      setFilteredDisplayData({ ...newDataMap });
-
-      // console.log("new data: ", newDataMap);
-
-      console.log("pagination end");
-      console.log("\n\n");
+      setFilteredDisplayData(newDataMap);
     }
-  }, [displayAmount, displayData, isLoading, page, targetModelName]);
+  }, [displayAmount, filteredData, isLoading, maxPage, page]);
 
   return {
     displayData: filterdDisplayData,
