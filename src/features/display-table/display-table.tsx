@@ -147,6 +147,7 @@ function DisplayTable({
                       pl="sm"
                       divider={<Divider color="blackAlpha.300" />}
                     >
+                      {/* reference */}
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
@@ -166,6 +167,7 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
+                      {/* baseline */}
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
@@ -222,6 +224,7 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
+                      {/* target */}
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"

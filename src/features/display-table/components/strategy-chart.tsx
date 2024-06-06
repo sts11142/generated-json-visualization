@@ -54,7 +54,7 @@ function StrategyChart({
       ? [
           { dataKey: "reference", color: "gray.500" },
           { dataKey: "baseline", color: "red.500" },
-          { dataKey: "ours1", color: "blue.500" }, // target
+          { dataKey: "ours1-series", color: "blue.500" }, // target
           ...comparisonsSeries,
         ]
       : [];
@@ -76,7 +76,7 @@ function StrategyChart({
       probComparisons
         ? result.push({
             name: labels[order],
-            ours1: data[order],
+            "ours1-series": data[order],
             baseline: baselineData[order],
             reference: referenceStrategyIdx === order ? 100.0 : 0.0,
             ...comparisons,
