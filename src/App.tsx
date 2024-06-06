@@ -15,49 +15,26 @@ import { useDisplayData } from "./features/display-table/hooks/useDisplayData";
 import { useMemo } from "react";
 
 function App() {
-  const targetNames = [
-    "baseline",
-    "ours1-series",
-    "ours1-series-cog",
-    "ours1-parallel-mlp",
-    "ours1-parallel-res",
-  ];
-  const targetFiles = targetNames.map((name) => `/sample-data/${name}.json`);
-
-  const {
-    data: ours1seriesData,
-    loading,
-    pagination,
-    filter,
-    correct,
-  } = useDisplayData(targetFiles[1]);
-
-  const { data: baselineData } = useDisplayData(targetFiles[0]);
-  const { data: ours1serieslight } = useDisplayData(targetFiles[2]);
-  const { data: ours1parallelmlp } = useDisplayData(targetFiles[3]);
-  const { data: ours1parallelres } = useDisplayData(targetFiles[4]);
-
-  const comparableDatas = useMemo(
+  const modelNames = useMemo(
     () => [
-      {
-        name: "ours1-series-cog",
-        data: ours1serieslight,
-      },
-      {
-        name: "ours1-paralell-res",
-        data: ours1parallelres,
-      },
-      {
-        name: "ours1-parallel-mlp",
-        data: ours1parallelmlp,
-      },
+      "baseline", // baseline
+      "ours1-series", // target
+      "baseline-aft-ew", // baseline-re
+      "ours1-series-cog",
+      "ours1-parallel-res",
+      "ours1-parallel-mlp",
     ],
-    [ours1parallelmlp, ours1parallelres, ours1serieslight],
+    [],
   );
+  const [baseline, target, ...comparisons] = modelNames;
+
+  const { displayData, loading, pagination, filter, correct } =
+    useDisplayData(modelNames);
 
   return (
     <>
       <Box w="full" h="full" bgColor="white">
+        {/* header content */}
         <VStack
           w="full"
           paddingBlock="md"
@@ -85,10 +62,23 @@ function App() {
           <Box marginInline="auto">
             <HStack gap="xl">
               <Flex gap="md" w="max-content" align="center">
-                <Text>hypothesis strategy is: </Text>
                 <Select
-                  value={filter.selectedLabel}
-                  onChange={filter.setSelectedLabel}
+                  value={filter.targetModelName}
+                  onChange={filter.onChangeTargetModelName}
+                  placeholderInOptions={false}
+                  defaultValue={filter.selectableModelNames[0]}
+                  w="sm"
+                >
+                  {filter.selectableModelNames.map((name) => (
+                    <Option key={name} value={name}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+                <Text>-</Text>
+                <Select
+                  value={filter.targetLabel}
+                  onChange={filter.onChangeTargetLabel}
                   placeholderInOptions={false}
                   placeholder="filter Strategy"
                   defaultValue={filter.selectableLabels[0]}
@@ -105,14 +95,16 @@ function App() {
                 <Checkbox
                   size="lg"
                   isChecked={correct.isCorrectedLabel}
-                  onChange={correct.toggle}
+                  onChange={correct.onChangeIsCorrectedLabel}
                 >
-                  correct strategy
+                  correct prediction
                 </Checkbox>
               </Box>
             </HStack>
           </Box>
         </VStack>
+
+        {/* main content */}
         <Container
           w="80%"
           minH="2xl"
@@ -122,12 +114,15 @@ function App() {
           borderColor="blackAlpha.400"
           borderRadius="xl"
         >
-          <DisplayTable
-            targetData={ours1seriesData}
-            baselineData={baselineData}
-            comparisonDatas={comparableDatas}
-            loading={loading}
-          />
+          {displayData ? (
+            <DisplayTable
+              targetData={displayData[target]}
+              baselineData={displayData[baseline]}
+              comparisonsData={comparisons.map((model) => displayData[model])}
+              loading={loading}
+              targetModelName={filter.targetModelName}
+            />
+          ) : null}
         </Container>
       </Box>
     </>

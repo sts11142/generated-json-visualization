@@ -10,37 +10,31 @@ import {
   Divider,
   Grid,
   GridItem,
-  NativeTable,
   Skeleton,
-  TableContainer,
   Tag,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   VStack,
 } from "@yamada-ui/react";
-import { DisplayData } from "./hooks/useDisplayData";
+import { ModelData } from "./hooks/useDisplayData";
 import { StrategyChart } from "./components";
 import { useMemo } from "react";
 
 type DisplayTableProps = {
-  targetData: DisplayData | undefined;
-  baselineData: DisplayData | undefined;
-  comparisonDatas: Array<{ name: string; data: DisplayData | undefined }>;
+  targetData: ModelData;
+  baselineData: ModelData;
+  comparisonsData: ModelData[];
   loading?: boolean;
+  targetModelName?: string;
 };
 function DisplayTable({
   targetData,
   baselineData,
-  comparisonDatas,
+  comparisonsData,
   loading,
+  targetModelName,
 }: DisplayTableProps) {
   const labels = useMemo(
     () => [
-      /* 不明なラベル： "[Reflection of Feelings]", "[Self-disclosure]", "[Information]" */
       "[Question]",
       "[Reflection of feelings]",
       "[Information]",
@@ -53,15 +47,19 @@ function DisplayTable({
     [],
   );
 
+  const [baselineRe, comparisons] = [
+    comparisonsData[0],
+    comparisonsData.slice(1),
+  ];
+
   return (
     <>
       {loading && <Skeleton h="xl" />}
       <VStack gap="3xl">
         {!loading &&
-          targetData &&
-          targetData.map((data, corpusIdx) => (
+          targetData.data.map((dialogue, corpusIdx) => (
             <Container
-              key={data.id}
+              key={dialogue.id}
               border="1px solid"
               borderColor="blackAlpha.400"
               borderRadius="xl"
@@ -72,10 +70,10 @@ function DisplayTable({
                   <Text as="h2" fontSize="xl" letterSpacing="wider">
                     <Text as="span" mr="md">
                       <Tag variant="outline" size="lg" colorScheme="neutral">
-                        {data.id}
+                        {dialogue.id}
                       </Tag>
                     </Text>
-                    {data.situation}
+                    {dialogue.situation}
                   </Text>
                 </Box>
 
@@ -98,7 +96,7 @@ function DisplayTable({
                           marginInline="auto"
                           divider={<Divider color="blackAlpha.300" />}
                         >
-                          {data.conversations.map((conv, idx) => (
+                          {dialogue.conversations.map((conv, idx) => (
                             <Grid
                               key={conv.utterances + idx}
                               templateColumns="min-content min-content 1fr"
@@ -137,7 +135,7 @@ function DisplayTable({
                   </Accordion>
                 </Box>
 
-                {/* strategy */}
+                {/* prediction */}
                 <Box>
                   <Card
                     p="md"
@@ -145,7 +143,10 @@ function DisplayTable({
                     border="2px solid"
                     borderColor="blackAlpha.300"
                   >
-                    <VStack pl="sm">
+                    <VStack
+                      pl="sm"
+                      divider={<Divider color="blackAlpha.300" />}
+                    >
                       {/* reference */}
                       <Grid
                         templateColumns="min-content min-content 1fr"
@@ -155,87 +156,136 @@ function DisplayTable({
                           <Text fontSize="lg">reference</Text>
                         </GridItem>
                         <GridItem w="18rem">
-                          <Text fontSize="lg">{data.reference.strategy}</Text>
+                          <Text fontSize="lg">
+                            {dialogue.reference.strategy}
+                          </Text>
                         </GridItem>
                         <GridItem>
                           <Text fontSize="xl" letterSpacing="wider">
-                            {data.reference.response}
+                            {dialogue.reference.response}
                           </Text>
                         </GridItem>
                       </Grid>
 
                       {/* baseline */}
-                      <Divider color="blackAlpha.300" />
+                      <Grid
+                        templateColumns="min-content min-content 1fr"
+                        alignItems="center"
+                      >
+                        <GridItem w="8rem">
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === baselineData.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            baseline
+                          </Text>
+                        </GridItem>
+                        <GridItem w="18rem">
+                          <Text fontSize="lg">
+                            {baselineData.data[corpusIdx].hypothesis.strategy}
+                          </Text>
+                        </GridItem>
+                        <GridItem>
+                          <Text fontSize="xl" letterSpacing="wider">
+                            {baselineData.data[corpusIdx].hypothesis.response}
+                          </Text>
+                        </GridItem>
+                      </Grid>
 
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
                       >
                         <GridItem w="8rem">
-                          <Text fontSize="lg">baseline</Text>
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === baselineRe.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            baseline-re
+                          </Text>
                         </GridItem>
                         <GridItem w="18rem">
                           <Text fontSize="lg">
-                            {baselineData &&
-                              baselineData[corpusIdx].hypothesis.strategy}
+                            {baselineRe.data[corpusIdx].hypothesis.strategy}
                           </Text>
                         </GridItem>
                         <GridItem>
                           <Text fontSize="xl" letterSpacing="wider">
-                            {baselineData &&
-                              baselineData[corpusIdx].hypothesis.response}
+                            {baselineRe.data[corpusIdx].hypothesis.response}
                           </Text>
                         </GridItem>
                       </Grid>
 
                       {/* target */}
-                      <Divider />
-
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
                       >
                         <GridItem w="8rem">
-                          <Text fontSize="lg">ours1-series</Text>
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === targetData.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            ours1-series
+                          </Text>
                         </GridItem>
                         <GridItem w="18rem">
-                          <Text fontSize="lg">{data.hypothesis.strategy}</Text>
+                          <Text fontSize="lg">
+                            {dialogue.hypothesis.strategy}
+                          </Text>
                         </GridItem>
                         <GridItem>
                           <Text fontSize="xl" letterSpacing="wider">
-                            {data.hypothesis.response}
+                            {dialogue.hypothesis.response}
                           </Text>
                         </GridItem>
                       </Grid>
 
-                      {comparisonDatas.map((item) => (
-                        <>
-                          <Divider key={item.name} />
-
-                          <Grid
-                            key={item.name}
-                            templateColumns="min-content min-content 1fr"
-                            alignItems="center"
-                          >
-                            <GridItem w="8rem">
-                              <Text fontSize="lg">{item.name}</Text>
-                            </GridItem>
-                            <GridItem w="18rem">
-                              <Text fontSize="lg">
-                                {item && item.data
-                                  ? item.data[corpusIdx].hypothesis.strategy
-                                  : "no data"}
-                              </Text>
-                            </GridItem>
-                            <GridItem>
-                              <Text fontSize="xl" letterSpacing="wider">
-                                {item && item.data
-                                  ? item.data[corpusIdx].hypothesis.response
-                                  : "no data"}
-                              </Text>
-                            </GridItem>
-                          </Grid>
-                        </>
+                      {comparisons.map((model: ModelData, idx) => (
+                        <Grid
+                          key={model.name + idx}
+                          templateColumns="min-content min-content 1fr"
+                          alignItems="center"
+                        >
+                          <GridItem w="8rem">
+                            <Text
+                              fontSize="lg"
+                              fontWeight={
+                                targetModelName === model.name
+                                  ? "bold"
+                                  : undefined
+                              }
+                            >
+                              {model.name}
+                            </Text>
+                          </GridItem>
+                          <GridItem w="18rem">
+                            <Text fontSize="lg">
+                              {!loading
+                                ? model.data[corpusIdx].hypothesis.strategy
+                                : "no data"}
+                            </Text>
+                          </GridItem>
+                          <GridItem key={model.name + idx}>
+                            <Text fontSize="xl" letterSpacing="wider">
+                              {!loading
+                                ? model.data[corpusIdx].hypothesis.response
+                                : "no data"}
+                            </Text>
+                          </GridItem>
+                        </Grid>
                       ))}
                     </VStack>
                   </Card>
@@ -251,70 +301,35 @@ function DisplayTable({
                       <AccordionPanel>
                         <VStack pt="md">
                           <Box>
-                            <StrategyChart
-                              data={data.strategyProb.map((item) =>
-                                Number(`${(item * 100).toFixed(2)}`),
-                              )}
-                              baselineData={
-                                baselineData
-                                  ? baselineData[corpusIdx].strategyProb.map(
-                                      (item) =>
-                                        Number(`${(item * 100).toFixed(2)}`),
-                                    )
-                                  : Array.from(new Array(8).fill(0.0))
-                              }
-                              probComparisons={
-                                comparisonDatas
-                                  ? comparisonDatas.map((item) =>
-                                      item.data
-                                        ? {
-                                            name: item.name,
-                                            data: item.data[
-                                              corpusIdx
-                                            ].strategyProb.map((item) =>
-                                              Number(
-                                                `${(item * 100).toFixed(2)}`,
-                                              ),
+                            {!loading ? (
+                              <StrategyChart
+                                data={dialogue.strategyProb.map((probValue) =>
+                                  Number(`${(probValue * 100).toFixed(2)}`),
+                                )}
+                                baselineData={baselineData.data[
+                                  corpusIdx
+                                ].strategyProb.map((probValue) =>
+                                  Number(`${(probValue * 100).toFixed(2)}`),
+                                )}
+                                probComparisons={comparisonsData.map(
+                                  (model) => ({
+                                    name: model.name,
+                                    data: !loading
+                                      ? model.data[corpusIdx].strategyProb.map(
+                                          (probValue) =>
+                                            Number(
+                                              `${(probValue * 100).toFixed(2)}`,
                                             ),
-                                          }
-                                        : {
-                                            name: item.name,
-                                            data: Array.from(
-                                              new Array(8).fill(0.0),
-                                            ),
-                                          },
-                                    )
-                                  : undefined
-                              }
-                              referenceStrategyIdx={labels.indexOf(
-                                data.reference.strategy,
-                              )}
-                            />
+                                        )
+                                      : Array.from(new Array(8).fill(0.0)),
+                                  }),
+                                )}
+                                referenceStrategyIdx={labels.indexOf(
+                                  dialogue.reference.strategy,
+                                )}
+                              />
+                            ) : null}
                           </Box>
-
-                          <TableContainer>
-                            <NativeTable withBorder>
-                              <Thead>
-                                <Tr>
-                                  {labels.map((label, idx) => (
-                                    <Th key={idx} textAlign="center">
-                                      {label}
-                                    </Th>
-                                  ))}
-                                </Tr>
-                              </Thead>
-
-                              <Tbody>
-                                <Tr>
-                                  {data.strategyProb.map((float, idx) => (
-                                    <Td key={idx} textAlign="center">
-                                      {(float * 100).toFixed(2)}%
-                                    </Td>
-                                  ))}
-                                </Tr>
-                              </Tbody>
-                            </NativeTable>
-                          </TableContainer>
                         </VStack>
                       </AccordionPanel>
                     </AccordionItem>
