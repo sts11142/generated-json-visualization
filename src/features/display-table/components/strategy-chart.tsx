@@ -84,9 +84,6 @@ function StrategyChart({
         : null;
     });
 
-    console.log("strategy-chart");
-    console.log(result);
-
     return result;
   }, [baselineData, probComparisons, data, labels, referenceStrategyIdx]);
 

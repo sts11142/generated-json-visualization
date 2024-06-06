@@ -17,7 +17,7 @@ import {
 } from "@yamada-ui/react";
 import { ModelData } from "./hooks/useDisplayData";
 import { StrategyChart } from "./components";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 type DisplayTableProps = {
   targetData: ModelData;
@@ -44,11 +44,6 @@ function DisplayTable({
     ],
     [],
   );
-
-  useEffect(() => {
-    console.log("display-table");
-    console.log("data len: ", targetData.data.length)
-  }, [targetData.data.length])
 
   return (
     <>

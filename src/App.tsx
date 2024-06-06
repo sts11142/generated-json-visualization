@@ -113,12 +113,14 @@ function App() {
           borderColor="blackAlpha.400"
           borderRadius="xl"
         >
-          <DisplayTable
-            targetData={displayData[target]}
-            baselineData={displayData[baseline]}
-            comparisonsData={comparisons.map((model) => displayData[model])}
-            loading={loading}
-          />
+          {displayData ? (
+            <DisplayTable
+              targetData={displayData[target]}
+              baselineData={displayData[baseline]}
+              comparisonsData={comparisons.map((model) => displayData[model])}
+              loading={loading}
+            />
+          ) : null}
         </Container>
       </Box>
     </>

@@ -52,7 +52,7 @@ const fetcher = (urls: string[]) => {
 };
 
 type UseResultDataProps = {
-  data: DisplayDataMap;
+  data: DisplayDataMap | undefined;
   error: Error | undefined;
   isLoading: boolean;
 };
@@ -65,10 +65,13 @@ const useResultData = (models: string[]): UseResultDataProps => {
     dataMap[model] = {
       name: model,
       data: jsonData ? jsonData[idx] : ([] as Dialogue[]),
+      // data: jsonData ? jsonData[idx].slice(0, 21) : ([] as Dialogue[]),
     };
   });
 
-  const [displayData, setDisplayData] = useState<DisplayDataMap>(dataMap);
+  const [displayData, setDisplayData] = useState<DisplayDataMap | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!isLoading) {
@@ -91,9 +94,12 @@ function useDisplayData(models: string[]) {
   const { data: displayData, isLoading, error } = useResultData(models);
 
   /* filtering */
-  const [filteredData, setFilteredData] = useState<DisplayDataMap>(displayData); // データフィルタリングの中間データ
-  const [filterdDisplayData, setFilteredDisplayData] =
-    useState<DisplayDataMap>(displayData);
+  const [filteredData, setFilteredData] = useState<DisplayDataMap | undefined>(
+    displayData,
+  ); // データフィルタリングの中間データ
+  const [filterdDisplayData, setFilteredDisplayData] = useState<
+    DisplayDataMap | undefined
+  >(displayData);
   const [targetModelName, setTargetModelName] = useState<ModelData["name"]>(
     models[0],
   );
@@ -126,45 +132,45 @@ function useDisplayData(models: string[]) {
 
   /* update filteredData when dependencies changed */
   useEffect(() => {
-    console.log("filtering");
-
     if (!isLoading) {
       /* filtering by target label */
       const tmpTargetDialogueIds: Array<Dialogue["id"]> = [];
       // search target dialogue ids (hyp.label === targetLabel) in target model
-      displayData[targetModelName].data.forEach((dialogue: Dialogue) => {
-        const isTargetLabel =
-          targetLabel === "any" || targetLabel === dialogue.hypothesis.strategy;
-        const isCorrect = isCorrectedLabel
-          ? dialogue.hypothesis.strategy === dialogue.reference.strategy
-          : true;
+      if (displayData) {
+        displayData[targetModelName].data.forEach((dialogue: Dialogue) => {
+          const isTargetLabel =
+            targetLabel === "any" ||
+            targetLabel === dialogue.hypothesis.strategy;
+          const isCorrect = isCorrectedLabel
+            ? dialogue.hypothesis.strategy === dialogue.reference.strategy
+            : true;
 
-        // push intended label id
-        isTargetLabel && isCorrect
-          ? tmpTargetDialogueIds.push(dialogue.id)
-          : null;
-      });
+          // push intended label id
+          isTargetLabel && isCorrect
+            ? tmpTargetDialogueIds.push(dialogue.id)
+            : null;
+        });
+      }
       // filter data in order to match tmpTargetDialogueIds
       //   and store new display data have target dialogue
-      const newDataMap: DisplayDataMap = Object.keys(displayData).reduce(
-        (acc, modelName) => {
-          acc[modelName] = {
-            ...displayData[modelName],
-            data: displayData[modelName].data.filter((dialogue: Dialogue) =>
-              tmpTargetDialogueIds.includes(dialogue.id),
-            ),
-          };
-          return acc;
-        },
-        {} as DisplayDataMap,
-      );
+      const newDataMap: DisplayDataMap | undefined = displayData
+        ? Object.keys(displayData).reduce((acc, modelName) => {
+            acc[modelName] = {
+              ...displayData[modelName],
+              data: displayData[modelName].data.filter((dialogue: Dialogue) =>
+                tmpTargetDialogueIds.includes(dialogue.id),
+              ),
+            };
+            return acc;
+          }, {} as DisplayDataMap)
+        : undefined;
       // pagination max length
       setMaxPage(() =>
-        Math.ceil(newDataMap[targetModelName].data.length / displayAmount),
+        newDataMap
+          ? Math.ceil(newDataMap[targetModelName].data.length / displayAmount)
+          : 1,
       );
       setFilteredData(newDataMap);
-
-      console.log("filtering end")
     }
   }, [
     displayData,
@@ -178,30 +184,25 @@ function useDisplayData(models: string[]) {
 
   /* handle changing page */
   useEffect(() => {
-    console.log("changing page");
-
     if (!isLoading) {
       // data slice for one page amount
-      let pageNum: number;
-      if (page <= maxPage) {
-        pageNum = page;
-      } else {
-        pageNum = 1;
-        onChange(pageNum);
+      const pageNum = page <= maxPage ? page : 1;
+      if (page >= maxPage) onChange(pageNum);
+
+      let newDataMap: DisplayDataMap | undefined = undefined;
+      if (filteredData) {
+        newDataMap = Object.keys(filteredData).reduce((acc, modelName) => {
+          acc[modelName] = {
+            ...filteredData[modelName],
+            data: filteredData[modelName].data.slice(
+              displayAmount * (pageNum - 1),
+              displayAmount * pageNum,
+            ),
+          };
+          return acc;
+        }, {} as DisplayDataMap);
       }
-      const newDataMap = Object.keys(filteredData).reduce((acc, modelName) => {
-        acc[modelName] = {
-          ...filteredData[modelName],
-          data: filteredData[modelName].data.slice(
-            displayAmount * (pageNum - 1),
-            displayAmount * pageNum,
-          ),
-        };
-        return acc;
-      }, {} as DisplayDataMap);
       setFilteredDisplayData(newDataMap);
-      
-      console.log("changing page end")
     }
   }, [displayAmount, filteredData, isLoading, maxPage, page]);
 
