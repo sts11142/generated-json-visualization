@@ -126,6 +126,8 @@ function useDisplayData(models: string[]) {
 
   /* update filteredData when dependencies changed */
   useEffect(() => {
+    console.log("filtering");
+
     if (!isLoading) {
       /* filtering by target label */
       const tmpTargetDialogueIds: Array<Dialogue["id"]> = [];
@@ -161,6 +163,8 @@ function useDisplayData(models: string[]) {
         Math.ceil(newDataMap[targetModelName].data.length / displayAmount),
       );
       setFilteredData(newDataMap);
+
+      console.log("filtering end")
     }
   }, [
     displayData,
@@ -174,6 +178,8 @@ function useDisplayData(models: string[]) {
 
   /* handle changing page */
   useEffect(() => {
+    console.log("changing page");
+
     if (!isLoading) {
       // data slice for one page amount
       let pageNum: number;
@@ -194,6 +200,8 @@ function useDisplayData(models: string[]) {
         return acc;
       }, {} as DisplayDataMap);
       setFilteredDisplayData(newDataMap);
+      
+      console.log("changing page end")
     }
   }, [displayAmount, filteredData, isLoading, maxPage, page]);
 

@@ -17,26 +17,23 @@ import { useMemo } from "react";
 function App() {
   const modelNames = useMemo(
     () => [
-      "baseline",
-      "ours1-series",
+      "baseline", // baseline
+      "ours1-series",  // target
       "ours1-parallel-res",
       "ours1-parallel-mlp",
     ],
     [],
   );
-  const [baseline, target, cmpr1, cmpr2] = modelNames;
+  const [baseline, target, ...comparisons] = modelNames;
 
   const { displayData, loading, pagination, filter, correct } =
     useDisplayData(modelNames);
 
-  const comparableDatas = useMemo(
-    () => [displayData[cmpr1], displayData[cmpr2]],
-    [cmpr1, cmpr2, displayData],
-  );
-
   return (
     <>
       <Box w="full" h="full" bgColor="white">
+
+        {/* header content */}
         <VStack
           w="full"
           paddingBlock="md"
@@ -105,6 +102,8 @@ function App() {
             </HStack>
           </Box>
         </VStack>
+
+        {/* main content */}
         <Container
           w="80%"
           minH="2xl"
@@ -117,7 +116,7 @@ function App() {
           <DisplayTable
             targetData={displayData[target]}
             baselineData={displayData[baseline]}
-            comparisonDatas={comparableDatas}
+            comparisonsData={comparisons.map((model) => displayData[model])}
             loading={loading}
           />
         </Container>

@@ -2,10 +2,16 @@
 import { AreaChart, AreaProps } from "@yamada-ui/charts";
 import { useMemo } from "react";
 
+type ProbComparison = { name: string; data: number[] | undefined };
+
+type ChartData = {
+  [key: string]: number;
+};
+
 type StrategyBarChartProps = {
   data: number[]; // expected strategy_prob data  [0.2347840815782547, 0.14163683354854584, 0.010241687297821045, 0.1956576108932495, ...]
   baselineData: number[];
-  probComparisons?: Array<{ name: string; data: number[] | undefined }>;
+  probComparisons?: ProbComparison[];
   referenceStrategyIdx: number;
 };
 function StrategyChart({
@@ -29,54 +35,64 @@ function StrategyChart({
     [],
   );
 
-  const series: AreaProps[] = useMemo(
-    () =>
-      probComparisons
-        ? [
-            { dataKey: "reference", color: "gray.500" },
-            { dataKey: "baseline", color: "red.500" },
-            { dataKey: "ours1", color: "blue.500" },
-            { dataKey: probComparisons[0].name, color: "violet.300" },
-            { dataKey: probComparisons[1].name, color: "cyan.100" },
-          ]
-        : [],
-    [probComparisons],
-  );
+  const series: AreaProps[] = useMemo(() => {
+    const dataColors = [
+      "sky.500", // ours1-series-cog
+      "violet.300", // ours1-parallel-res
+      "cyan.100", // ours1-parallel-mlp
+      "pink.300", // baseline-re
+    ];
+
+    const comparisonsSeries: AreaProps[] = probComparisons
+      ? probComparisons.map((model, idx) => ({
+          dataKey: model.name,
+          color: dataColors[idx],
+        }))
+      : [];
+
+    return probComparisons
+      ? [
+          { dataKey: "reference", color: "gray.500" },
+          { dataKey: "baseline", color: "red.500" },
+          { dataKey: "ours1", color: "blue.500" }, // target
+          ...comparisonsSeries,
+        ]
+      : [];
+  }, [probComparisons]);
 
   const processedData: object[] = useMemo(() => {
     const result: object[] = [];
-    const ESCStrategyOrder = [0, 3, 1, 5, 6, 7, 2, 4]; // ESConv の論文に基づく並び順。ESC Framework の 3states。
+    const ESCStrategyOrder = [0, 3, 1, 5, 6, 7, 2, 4]; // 格納されているデータのラベルの順序を、ESConvの論文に基づく並び順に変更する。ESC Framework の 3statesに対応している。
 
+    // 意図した並び順で、チャートに渡すデータを準備する
     ESCStrategyOrder.map((order) => {
+      const comparisons = probComparisons
+        ? probComparisons.reduce((acc: ChartData, probData: ProbComparison) => {
+            acc[probData.name] = probData.data ? probData.data[order] : 0.0;
+            return acc;
+          }, {} as ChartData)
+        : {};
+
       probComparisons
         ? result.push({
             name: labels[order],
             ours1: data[order],
             baseline: baselineData[order],
-            [probComparisons[0].name]:
-              probComparisons && probComparisons[0].data
-                ? probComparisons[0].data[order]
-                : 0.0,
-            [probComparisons[1].name]:
-              probComparisons && probComparisons[1].data
-                ? probComparisons[1].data[order]
-                : 0.0,
             reference: referenceStrategyIdx === order ? 100.0 : 0.0,
+            ...comparisons,
           })
         : null;
     });
+
+    console.log("strategy-chart");
+    console.log(result);
 
     return result;
   }, [baselineData, probComparisons, data, labels, referenceStrategyIdx]);
 
   return (
     <>
-      <AreaChart
-        data={processedData}
-        series={series}
-        dataKey="name"
-        unit="%"
-      />
+      <AreaChart data={processedData} series={series} dataKey="name" unit="%" />
     </>
   );
 }

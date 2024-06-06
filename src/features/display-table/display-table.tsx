@@ -10,32 +10,25 @@ import {
   Divider,
   Grid,
   GridItem,
-  // NativeTable,
   Skeleton,
-  // TableContainer,
   Tag,
-  // Tbody,
-  // Td,
   Text,
-  // Th,
-  // Thead,
-  // Tr,
   VStack,
 } from "@yamada-ui/react";
 import { ModelData } from "./hooks/useDisplayData";
 import { StrategyChart } from "./components";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 type DisplayTableProps = {
   targetData: ModelData;
   baselineData: ModelData;
-  comparisonDatas: ModelData[];
+  comparisonsData: ModelData[];
   loading?: boolean;
 };
 function DisplayTable({
   targetData,
   baselineData,
-  comparisonDatas,
+  comparisonsData,
   loading,
 }: DisplayTableProps) {
   const labels = useMemo(
@@ -51,6 +44,11 @@ function DisplayTable({
     ],
     [],
   );
+
+  useEffect(() => {
+    console.log("display-table");
+    console.log("data len: ", targetData.data.length)
+  }, [targetData.data.length])
 
   return (
     <>
@@ -143,7 +141,10 @@ function DisplayTable({
                     border="2px solid"
                     borderColor="blackAlpha.300"
                   >
-                    <VStack pl="sm">
+                    <VStack
+                      pl="sm"
+                      divider={<Divider color="blackAlpha.300" />}
+                    >
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
@@ -162,8 +163,6 @@ function DisplayTable({
                           </Text>
                         </GridItem>
                       </Grid>
-
-                      <Divider color="blackAlpha.300" />
 
                       <Grid
                         templateColumns="min-content min-content 1fr"
@@ -184,8 +183,6 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
-                      <Divider />
-
                       <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
@@ -205,34 +202,30 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
-                      {comparisonDatas.map((model) => (
-                        <>
-                          <Divider key={model.name} />
-
-                          <Grid
-                            key={model.name}
-                            templateColumns="min-content min-content 1fr"
-                            alignItems="center"
-                          >
-                            <GridItem w="8rem">
-                              <Text fontSize="lg">{model.name}</Text>
-                            </GridItem>
-                            <GridItem w="18rem">
-                              <Text fontSize="lg">
-                                {loading
-                                  ? model.data[corpusIdx].hypothesis.strategy
-                                  : "no data"}
-                              </Text>
-                            </GridItem>
-                            <GridItem>
-                              <Text fontSize="xl" letterSpacing="wider">
-                                {loading
-                                  ? model.data[corpusIdx].hypothesis.response
-                                  : "no data"}
-                              </Text>
-                            </GridItem>
-                          </Grid>
-                        </>
+                      {comparisonsData.map((model, idx) => (
+                        <Grid
+                          key={model.name + idx}
+                          templateColumns="min-content min-content 1fr"
+                          alignItems="center"
+                        >
+                          <GridItem w="8rem">
+                            <Text fontSize="lg">{model.name}</Text>
+                          </GridItem>
+                          <GridItem w="18rem">
+                            <Text fontSize="lg">
+                              {!loading
+                                ? model.data[corpusIdx].hypothesis.strategy
+                                : "no data"}
+                            </Text>
+                          </GridItem>
+                          <GridItem key={model.name + idx}>
+                            <Text fontSize="xl" letterSpacing="wider">
+                              {!loading
+                                ? model.data[corpusIdx].hypothesis.response
+                                : "no data"}
+                            </Text>
+                          </GridItem>
+                        </Grid>
                       ))}
                     </VStack>
                   </Card>
@@ -248,55 +241,35 @@ function DisplayTable({
                       <AccordionPanel>
                         <VStack pt="md">
                           <Box>
-                            <StrategyChart
-                              data={dialogue.strategyProb.map((probValue) =>
-                                Number(`${(probValue * 100).toFixed(2)}`),
-                              )}
-                              baselineData={baselineData.data[
-                                corpusIdx
-                              ].strategyProb.map((probValue) =>
-                                Number(`${(probValue * 100).toFixed(2)}`),
-                              )}
-                              probComparisons={comparisonDatas.map((model) => ({
-                                name: model.name,
-                                data: loading
-                                  ? model.data[corpusIdx].strategyProb.map(
-                                      (probValue) =>
-                                        Number(
-                                          `${(probValue * 100).toFixed(2)}`,
-                                        ),
-                                    )
-                                  : Array.from(new Array(8).fill(0.0)),
-                              }))}
-                              referenceStrategyIdx={labels.indexOf(
-                                dialogue.reference.strategy,
-                              )}
-                            />
+                            {!loading ? (
+                              <StrategyChart
+                                data={dialogue.strategyProb.map((probValue) =>
+                                  Number(`${(probValue * 100).toFixed(2)}`),
+                                )}
+                                baselineData={baselineData.data[
+                                  corpusIdx
+                                ].strategyProb.map((probValue) =>
+                                  Number(`${(probValue * 100).toFixed(2)}`),
+                                )}
+                                probComparisons={comparisonsData.map(
+                                  (model) => ({
+                                    name: model.name,
+                                    data: !loading
+                                      ? model.data[corpusIdx].strategyProb.map(
+                                          (probValue) =>
+                                            Number(
+                                              `${(probValue * 100).toFixed(2)}`,
+                                            ),
+                                        )
+                                      : Array.from(new Array(8).fill(0.0)),
+                                  }),
+                                )}
+                                referenceStrategyIdx={labels.indexOf(
+                                  dialogue.reference.strategy,
+                                )}
+                              />
+                            ) : null}
                           </Box>
-
-                          {/* <TableContainer>
-                            <NativeTable withBorder>
-                              <Thead>
-                                <Tr>
-                                  {labels.map((label, idx) => (
-                                    <Th key={idx} textAlign="center">
-                                      {label}
-                                    </Th>
-                                  ))}
-                                </Tr>
-                              </Thead>
-
-                              <Tbody>
-                                <Tr>
-                                  {data.strategyProb.map((float, idx) => (
-                                    <Td key={idx} textAlign="center">
-                                      {(float * 100).toFixed(2)}%
-                                    </Td>
-                                  ))}
-                                </Tr>
-                              </Tbody>
-                            </NativeTable>
-                          </TableContainer> */}
                         </VStack>
                       </AccordionPanel>
                     </AccordionItem>
