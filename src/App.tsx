@@ -18,7 +18,9 @@ function App() {
   const modelNames = useMemo(
     () => [
       "baseline", // baseline
-      "ours1-series",  // target
+      "ours1-series", // target
+      "baseline-aft-ew", // baseline-re
+      "ours1-series-cog",
       "ours1-parallel-res",
       "ours1-parallel-mlp",
     ],
@@ -32,7 +34,6 @@ function App() {
   return (
     <>
       <Box w="full" h="full" bgColor="white">
-
         {/* header content */}
         <VStack
           w="full"
@@ -119,6 +120,7 @@ function App() {
               baselineData={displayData[baseline]}
               comparisonsData={comparisons.map((model) => displayData[model])}
               loading={loading}
+              targetModelName={filter.targetModelName}
             />
           ) : null}
         </Container>

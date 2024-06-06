@@ -24,12 +24,14 @@ type DisplayTableProps = {
   baselineData: ModelData;
   comparisonsData: ModelData[];
   loading?: boolean;
+  targetModelName?: string;
 };
 function DisplayTable({
   targetData,
   baselineData,
   comparisonsData,
   loading,
+  targetModelName,
 }: DisplayTableProps) {
   const labels = useMemo(
     () => [
@@ -44,6 +46,11 @@ function DisplayTable({
     ],
     [],
   );
+
+  const [baselineRe, comparisons] = [
+    comparisonsData[0],
+    comparisonsData.slice(1),
+  ];
 
   return (
     <>
@@ -128,7 +135,7 @@ function DisplayTable({
                   </Accordion>
                 </Box>
 
-                {/* strategy */}
+                {/* prediction */}
                 <Box>
                   <Card
                     p="md"
@@ -164,7 +171,16 @@ function DisplayTable({
                         alignItems="center"
                       >
                         <GridItem w="8rem">
-                          <Text fontSize="lg">baseline</Text>
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === baselineData.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            baseline
+                          </Text>
                         </GridItem>
                         <GridItem w="18rem">
                           <Text fontSize="lg">
@@ -183,7 +199,44 @@ function DisplayTable({
                         alignItems="center"
                       >
                         <GridItem w="8rem">
-                          <Text fontSize="lg">ours1-series</Text>
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === baselineRe.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            baseline-re
+                          </Text>
+                        </GridItem>
+                        <GridItem w="18rem">
+                          <Text fontSize="lg">
+                            {baselineRe.data[corpusIdx].hypothesis.strategy}
+                          </Text>
+                        </GridItem>
+                        <GridItem>
+                          <Text fontSize="xl" letterSpacing="wider">
+                            {baselineRe.data[corpusIdx].hypothesis.response}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+
+                      <Grid
+                        templateColumns="min-content min-content 1fr"
+                        alignItems="center"
+                      >
+                        <GridItem w="8rem">
+                          <Text
+                            fontSize="lg"
+                            fontWeight={
+                              targetModelName === targetData.name
+                                ? "bold"
+                                : undefined
+                            }
+                          >
+                            ours1-series
+                          </Text>
                         </GridItem>
                         <GridItem w="18rem">
                           <Text fontSize="lg">
@@ -197,14 +250,23 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
-                      {comparisonsData.map((model, idx) => (
+                      {comparisons.map((model: ModelData, idx) => (
                         <Grid
                           key={model.name + idx}
                           templateColumns="min-content min-content 1fr"
                           alignItems="center"
                         >
                           <GridItem w="8rem">
-                            <Text fontSize="lg">{model.name}</Text>
+                            <Text
+                              fontSize="lg"
+                              fontWeight={
+                                targetModelName === model.name
+                                  ? "bold"
+                                  : undefined
+                              }
+                            >
+                              {model.name}
+                            </Text>
                           </GridItem>
                           <GridItem w="18rem">
                             <Text fontSize="lg">
