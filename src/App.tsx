@@ -19,10 +19,11 @@ function App() {
     () => [
       "baseline", // baseline
       "ours1-series", // target
-      "baseline-aft-ew", // baseline-re
-      "ours1-series-cog",
-      "ours1-parallel-res",
-      "ours1-parallel-mlp",
+      "re-baseline",
+      "re-ours1-series",
+      // "ours1-series-cog",
+      // "ours1-parallel-res",
+      // "ours1-parallel-mlp",
     ],
     [],
   );

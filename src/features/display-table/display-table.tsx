@@ -181,7 +181,7 @@ function DisplayTable({
                                 : undefined
                             }
                           >
-                            baseline
+                            {baselineData.name}
                           </Text>
                         </GridItem>
                         <GridItem w="18rem">
@@ -209,7 +209,7 @@ function DisplayTable({
                                 : undefined
                             }
                           >
-                            baseline-re
+                            {baselineRe.name}
                           </Text>
                         </GridItem>
                         <GridItem w="18rem">
@@ -238,7 +238,7 @@ function DisplayTable({
                                 : undefined
                             }
                           >
-                            ours1-series
+                            {targetData.name}
                           </Text>
                         </GridItem>
                         <GridItem w="18rem">
