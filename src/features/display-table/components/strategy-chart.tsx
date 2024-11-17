@@ -37,10 +37,10 @@ function StrategyChart({
 
   const series: AreaProps[] = useMemo(() => {
     const dataColors = [
-      "pink.300", // baseline-re
-      "sky.500", // ours1-series-cog
-      "violet.300", // ours1-parallel-res
+      "sky.200", // ours1-series-cog
+      "green.500", // ours1-parallel-res
       "cyan.100", // ours1-parallel-mlp
+      "pink.300", // baseline-re
     ];
 
     const comparisonsSeries: AreaProps[] = probComparisons

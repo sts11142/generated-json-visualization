@@ -17,13 +17,22 @@ import { useMemo } from "react";
 function App() {
   const modelNames = useMemo(
     () => [
-      "baseline", // baseline
-      "ours1-series", // target
-      "re-baseline",
-      "re-ours1-series",
+      "baseline-origin",
+      // "ours1-series", // target
+      // "baseline", // baseline
+      // "re-ours1-series",
+      // "re-baseline",
+      // "re-ours1-series-hardfixed-2",
+      // "re-ours1-series-hardfixed-3",
       // "ours1-series-cog",
       // "ours1-parallel-res",
       // "ours1-parallel-mlp",
+      // "ours3",
+      // "ours4-stage-simple-series",
+      // "ours1-series-focal-loss-g2",
+      // "cfm-misc",
+      "cfm-ours1",
+      // "cfm-ours1-wo-knwlg",
     ],
     [],
   );

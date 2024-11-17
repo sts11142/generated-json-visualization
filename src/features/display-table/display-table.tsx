@@ -47,10 +47,11 @@ function DisplayTable({
     [],
   );
 
-  const [baselineRe, comparisons] = [
-    comparisonsData[0],
-    comparisonsData.slice(1),
-  ];
+  // const [baselineRe, comparisons] = [
+  //   comparisonsData[0],
+  //   comparisonsData.slice(1),
+  // ];
+  const comparisons = comparisonsData
 
   return (
     <>
@@ -196,7 +197,7 @@ function DisplayTable({
                         </GridItem>
                       </Grid>
 
-                      <Grid
+                      {/* <Grid
                         templateColumns="min-content min-content 1fr"
                         alignItems="center"
                       >
@@ -222,7 +223,7 @@ function DisplayTable({
                             {baselineRe.data[corpusIdx].hypothesis.response}
                           </Text>
                         </GridItem>
-                      </Grid>
+                      </Grid> */}
 
                       {/* target */}
                       <Grid
