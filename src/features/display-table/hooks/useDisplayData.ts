@@ -36,7 +36,7 @@ type DisplayDataMap = {
 type Strategy =
   | "[Question]"
   | "[Restatement or Paraphrasing]"
-  | "[Reflection of Feelings]"
+  | "[Reflection of feelings]"
   | "[Self-disclosure]"
   | "[Affirmation and Reassurance]"
   | "[Providing Suggestions]"
@@ -120,7 +120,7 @@ function useDisplayData(models: string[]) {
       "any",
       "[Question]",
       "[Restatement or Paraphrasing]",
-      "[Reflection of Feelings]",
+      "[Reflection of feelings]",
       "[Self-disclosure]",
       "[Affirmation and Reassurance]",
       "[Providing Suggestions]",
