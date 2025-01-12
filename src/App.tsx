@@ -4,6 +4,7 @@ import {
   Container,
   Flex,
   HStack,
+  Input,
   Option,
   Pagination,
   Select,
@@ -41,8 +42,12 @@ function App() {
   );
   const [baseline, target, ...comparisons] = modelNames;
 
-  const { displayData, loading, pagination, filter, correct } =
+  const { displayData, loading, pagination, filter, correct, search } =
     useDisplayData(modelNames);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    search.onChangeSearchId(e.target.value);
+  };
 
   return (
     <>
@@ -112,6 +117,15 @@ function App() {
                 >
                   correct prediction
                 </Checkbox>
+              </Box>
+
+              {/* search */}
+              <Box>
+                <Input
+                  value={search.searchId}
+                  onChange={handleInputChange}
+                  placeholder="search data"
+                ></Input>
               </Box>
             </HStack>
           </Box>
