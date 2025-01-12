@@ -17,9 +17,9 @@ import { useMemo } from "react";
 function App() {
   const modelNames = useMemo(
     () => [
-      "baseline-origin",
+      "baseline",
       // "ours1-series", // target
-      // "baseline", // baseline
+      // "_baseline", // baseline
       // "re-ours1-series",
       // "re-baseline",
       // "re-ours1-series-hardfixed-2",
@@ -31,8 +31,11 @@ function App() {
       // "ours4-stage-simple-series",
       // "ours1-series-focal-loss-g2",
       // "cfm-misc",
-      "cfm-ours1",
+      "cfm-misc-strategy-attn",
+      // "CFDeNet",
+      "cfm-ours1-strategy-attn",
       // "cfm-ours1-wo-knwlg",
+      // "CasDecNet-emp-proc",
     ],
     [],
   );
