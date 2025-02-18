@@ -37,6 +37,7 @@ function App() {
       "cfm-ours1-strategy-attn",
       // "cfm-ours1-wo-knwlg",
       // "CasDecNet-emp-proc",
+      "cfm-ours1-wo-know",
     ],
     [],
   );
