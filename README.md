@@ -1,3 +1,27 @@
+# 環境構築
+
+以下のパッケージを何らかの方法でインストールしておく。
+
+- node.js
+- npm
+
+このリポジトリを、ローカルの任意の場所にクローンする。
+例えば、
+
+```
+$ cd ~/dev/lab
+$ git clone https://github.com/sts11142/generated-json-visualization.git
+$ cd generated-json-visualization
+```
+
+アプリを起動する。
+立ち上がったローカルサーバーにブラウザでアクセスする（通常は、http://localhost:5173/）
+
+```
+$ npm run dev
+```
+
+
 # app
 [Here](https://generated-json-visualization.onrender.com/) is on Render deployed.
 
